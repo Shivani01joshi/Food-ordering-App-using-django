@@ -21,5 +21,6 @@ class Cart(BaseModel):
     is_paid=models.BooleanField(default=False)
 
 class CartItems(BaseModel):
+    objects = models.Manager() 
     Pizza=models.ForeignKey(Pizza,on_delete=models.CASCADE)
     cart=models.ForeignKey(Cart,on_delete=models.CASCADE,related_name='cart_items')
