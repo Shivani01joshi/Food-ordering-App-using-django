@@ -67,3 +67,48 @@ def create_pizza(request):
     else:
         form = PizzaForm()
     return render(request, 'pizza_form.html', {'form': form})
+
+from django.shortcuts import render
+
+# Create your views here.
+
+import boto3
+from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+
+class UploadImage(APIView):
+    def post(self, request):
+        file = request.FILES.get("image")
+        print(file)
+        if not file:
+            return Response({"error": "No file provided"}, status=400)
+
+        s3 = boto3.client(
+            's3',
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME
+        )
+        print("s3",s3)
+        file_path = f"uploads/{file.name}"
+        print("file path",file_path)
+        try:
+            s3.upload_fileobj(
+                file,
+                settings.AWS_STORAGE_BUCKET_NAME,
+                file_path,
+                ExtraArgs={
+                    "ContentType": file.content_type,
+                    #"ACL": "public-read"
+                }
+            )
+
+            url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{file_path}"
+            print(url)
+            return Response({"message": "Uploaded", "url": url}, status=201)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)

@@ -11,12 +11,14 @@ class PizzaCategory(BaseModel):
     name = models.CharField(max_length=100, unique=True)
 
 class Pizza(BaseModel):
+    objects = models.Manager() 
     name = models.CharField(max_length=100, unique=True)
     category = models.ForeignKey(PizzaCategory, on_delete=models.CASCADE, related_name='pizzas')
     price=models.IntegerField()
     image=models.ImageField(upload_to='images')
 
 class Cart(BaseModel):
+    objects = models.Manager() 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='carts')
     is_paid=models.BooleanField(default=False)
 
