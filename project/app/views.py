@@ -1,6 +1,9 @@
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
 from django.contrib.auth import login as auth_login
+
+from .s3_upload import upload_to_s3
 
 from .models import Cart, CartItems, Pizza
 from .forms import PizzaForm 
@@ -67,6 +70,26 @@ def create_pizza(request):
     else:
         form = PizzaForm()
     return render(request, 'pizza_form.html', {'form': form})
+from django.views.decorators.csrf import csrf_exempt
+@csrf_exempt
+def upload_view(request):
+    print("UPLOAD VIEW HIT")
+
+    if request.method == "POST":
+        try:
+            print("FILES:", request.FILES)
+            file = request.FILES["file"]
+            print("FILE RECEIVED:", file.name)
+            url = upload_to_s3(file, file.name)
+
+            print("UPLOAD SUCCESS:", url)
+            return JsonResponse({"file_url": url})
+        
+        except Exception as e:
+            print("ERROR:", e)
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return render(request, "upload.html")
 
 from django.shortcuts import render
 
@@ -112,3 +135,4 @@ class UploadImage(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+

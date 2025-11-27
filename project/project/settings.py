@@ -5,9 +5,9 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-#SECRET_KEY = "django-insecure-replace-this"
 
-DEBUG = False
+DEBUG = True
+
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
@@ -35,10 +35,16 @@ ROOT_URLCONF = "project.project.urls"
 WSGI_APPLICATION = "project.project.wsgi.application"
 
 
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -51,21 +57,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "project.wsgi.application"
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
-]
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
@@ -73,28 +64,29 @@ USE_I18N = True
 USE_TZ = True
 
 # ------------------------------------------------
-# LOCAL STATIC FOLDERS (ONLY FOR DEVELOPMENT)
-# STATIC ROOT FOR LOCAL COLLECTSTATIC
+# REQUIRED LOCAL STATIC/MEDIA ROOT
+# ------------------------------------------------
+STATIC_ROOT = BASE_DIR / "staticfiles"
+MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 # ------------------------------------------------
 # AWS S3 CONFIG
 # ------------------------------------------------
-SECRET_KEY = os.getenv("SECRET_KEY")
-
-DEBUG = os.getenv("DEBUG", "False") == "True"
-
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
-
+SECRET_KEY=os.getenv("SECRET_KEY")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
-AWS_S3_SIGNATURE_VERSION = os.getenv("AWS_S3_SIGNATURE_VERSION")
-AWS_S3_FILE_OVERWRITE = os.getenv("AWS_S3_FILE_OVERWRITE") == "True"
-AWS_DEFAULT_ACL = os.getenv("AWS_DEFAULT_ACL")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "us-east-1")
 
+#AWS_DEFAULT_ACL = None
+AWS_S3_FILE_OVERWRITE = False
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_SIGNATURE_VERSION = "s3v4"
 
-STATICFILES_STORAGE = "project.storage_backends.StaticStorage"
-DEFAULT_FILE_STORAGE = "project.storage_backends.MediaStorage"
+# Django storages custom classes
+STATICFILES_STORAGE = "project.custom_s3.Boto3StaticStorage"
+DEFAULT_FILE_STORAGE = "project.custom_s3.Boto3MediaStorage"
 
+# S3 URLs
+STATIC_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/"
+MEDIA_URL  = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/media/"

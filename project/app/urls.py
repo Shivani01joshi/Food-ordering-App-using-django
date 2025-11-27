@@ -12,5 +12,5 @@ urlpatterns = [
     path('add_cart/<int:pizza_id>/', views.add_cart, name='add_cart'),
     path('remove_cart/<int:item_id>/', views.remove_cart, name='remove_cart_item'),
     path('create-pizza/', views.create_pizza, name='create_pizza'),
-     path("upload/", views.UploadImage.as_view(), name="upload"),
+     path("upload/", views.upload_view, name="upload"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
