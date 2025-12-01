@@ -15,7 +15,8 @@ class Pizza(BaseModel):
     name = models.CharField(max_length=100, unique=True)
     category = models.ForeignKey(PizzaCategory, on_delete=models.CASCADE, related_name='pizzas')
     price=models.IntegerField()
-    image=models.ImageField(upload_to='images')
+    image = models.ImageField(upload_to="")
+
 
 class Cart(BaseModel):
     objects = models.Manager() 
